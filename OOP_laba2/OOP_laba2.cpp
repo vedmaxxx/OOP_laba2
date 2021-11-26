@@ -3,33 +3,121 @@
 using namespace std;
 
 class Point {
-    //переменные для наследования
 protected:
     int x;
     int y;
 
 public:
-    //конструктор по умолчанию
     Point() {
-        printf("\tКонструктор по умолчанию %p\n", this);
+        printf("\tPoint() %p\n", this);
+        x = 0;
+        y = 0;
     }
-    //конструктор c параметрами
-    Point(int _x, int _y) {
-        printf("\tКонструктор с параметрами %p\n", this);
-        x = _x;
-        y = _y;
+    Point(int x, int y) {
+        printf("\tPoint(int x, int y) %p\n", this);
+        this->x = x;
+        this->y = y;
     }
-    //конструктор копирования
-    Point(const Point &point) {
-        printf("\tКонструктор копирования %p\n", this);
+    Point(const Point& point) {
+        printf("\tPoint(const Point &point) %p\n", this);
         x = point.x;
         y = point.y;
     }
     ~Point() {
-        printf("\tДеструктор %p\n", this);
+        printf("\t~Point() %p\n", this);
+    }
+    void getPoint(int* x, int* y) {
+        *x = this->x;
+        *y = this->y;
+    }
+    void setPoint(int x, int y) {
+        this->x = x;
+        this->y = y;
+    }
+    virtual void printPoint();
+};
+
+//описание метода вне класса
+void Point::printPoint() {
+    printf("(%d, %d)\n", x, y);
+}
+
+class Point3D : public Point {
+protected:
+    int z;
+
+public:
+    Point3D() : Point() {
+        printf("\tPoint3D() %p\n", this);
+        z = 0;
+    }
+    Point3D(int x, int y, int z) : Point(x, y) {
+        printf("\tPoint3D(int x, int y, int z) %p\n", this);
+        this->z = z;
+    }
+    ~Point3D() {
+        printf("\t~Point3D() %p\n", this);
+    }
+
+    int sum() {
+        return (x + y + z);
+    }
+
+    void getPoint(int* x, int* y, int* z) {
+        //посмотреть как переделать
+        Point::getPoint(x, y);
+        *z = this->z;
+    }
+    void printPoint() override {
+        printf("(%d, %d, %d)\n", x, y, z);
     }
 };
 
+class Vector {
+private:
+    Point* p1;
+    //проверка 
+    Point p2;
+
+public:
+    Vector() {
+        printf("\tVector() %p\n", this);
+        p1 = new Point;
+        //p3 уже создан и инициализирован по умолчанию
+    }
+    Vector(Point* p1, Point* p2) {
+        printf("\tVector(Point* p1, Point* p2) %p\n", this);
+        this->p1 = new Point(*p1);
+        this->p2 = *p2;
+    }
+    Vector(const Vector& vector) {
+        printf("\tVector(const Vector& vector) %p\n", this);
+        
+        this->p1 = new Point(*vector.p1);
+        this->p2 = vector.p2;
+    }
+    ~Vector() {
+        printf("\t~Vector() %p\n", this);
+        delete p1;
+    }
+    //геттер обоих точек вектора
+    void getVectorPoints(Point *p1, Point *p2) {
+        *p1 = *(this->p1);
+        *p2 = this->p2;
+    }
+    void printVector() {
+        printf("Vector: {\n");
+
+        p1->printPoint();
+        p2.printPoint();    //статический
+
+        printf("}\n");
+    }
+};
+
+void one(Point* p) {
+    p->printPoint();
+}
 
 int main()
 {
@@ -53,5 +141,77 @@ int main()
         delete a1;
         delete a2;
         delete a3;
+    }
+    printf("\n\n\n");
+    
+    {
+        printf("Геттер динамического объекта класса Point, инициализированного конструктором по умолчанию:\n");
+        Point* a = new Point;
+
+        int x, y, z;
+        //выгружаем в x, y значения соответствующих полей объекта a
+        a->getPoint(&x, &y);
+        delete a;
+        printf("\tточка (%d, %d)\n\n", x, y);
+
+        x = -1;
+        y = -1;
+        z = -1;
+
+        printf("Геттер статического объекта класса Point3D:\n");
+        Point3D point1(4, 3, 2);
+        
+        point1.getPoint(&x, &y, &z);
+        printf("\tточка (%d, %d, %d)\n\n", x, y, z);
+    }
+    printf("\n\n\n");
+    {
+        printf("Работа с вектором\n");
+
+        //создаем точки
+        printf("Создаем точки a, b:\n");
+        Point a(2,5);
+        Point b(7,0);
+
+        printf("\tточка a");
+        a.printPoint();
+        printf("\tточка b");
+        b.printPoint();
+        
+
+        //создаем вектор из точек a и b, передавая ссылки на них
+        printf("Создаем вектор:\n");
+        Vector vector(&a, &b);
+        
+        printf("Создаем точки a1, b1:\n");
+        //создаем пустые точки, в которые нужно выгрузить вектор
+        Point a1;
+        Point b1;
+
+        printf("Выгружаем вектор в точки a1, b1:\n");
+        vector.getVectorPoints(&a1, &b1);
+
+        printf("точка a1");
+        a1.printPoint();
+        printf("точка b1");
+        b1.printPoint();
+
+        printf("Выводим вектор:\n");
+        vector.printVector();
+
+        Vector *vector1 = new Vector(vector);
+        delete vector1;
+        printf("\nхуета\n");
+    }
+
+    {
+        //p1 может использовать методы point3d, которые переопределены из родительского класса Point 
+        Point* p1 = new Point3D(10, 3, 20);
+        one(p1);
+
+        Point3D* p3 = new Point3D;
+        p3->printPoint();
+        one(p3);
+        
     }
 }

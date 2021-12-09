@@ -23,7 +23,7 @@ public:
         x = point.x;
         y = point.y;
     }
-    ~Point() {
+    virtual ~Point() {
         printf("\t~Point() %p\n", this);
     }
     void getPoint(int* x, int* y) {
@@ -106,10 +106,8 @@ public:
     }
     void printVector() {
         printf("Vector: {\n");
-
         p1->printPoint();
         p2.printPoint();
-
         printf("}\n");
     }
 };
@@ -131,6 +129,7 @@ int main()
         Point a1;
         Point a2(10, 3);
         Point a3(a2);
+        printf("Выход из области видимости\n");
     }
     printf("\n\n\n");
     //динамическое создание объектов
@@ -148,7 +147,7 @@ int main()
     printf("\n\n\n");
     
     {
-        printf("Геттер динамического объекта класса Point, инициализированного конструктором по умолчанию:\n");
+        printf("Геттер динамического объекта класса Point,\nинициализированного конструктором по умолчанию:\n");
         Point* a = new Point;
         int x, y, z;
 
@@ -221,6 +220,7 @@ int main()
         printf("Удаление vector2:\n");
         delete vector2;
         printf("\n");
+        printf("Удаление статических элементов:\n");
     }
     printf("\n\n\n");
     {
@@ -230,11 +230,23 @@ int main()
 
         printf("Point3D* p1 = new Point3D(32, 46, 78)\n");
         Point3D* p1 = new Point3D(32, 46, 78);
+        printf("\t");
+        p1->printPoint();
+
         printf("Point* p2 = new Point3D(0, 3, 20)\n");
         Point* p2 = new Point3D(0, 3, 20);
+        printf("\t");
+        p2->printPoint();
+
         printf("Point* p3 = new Point(11, 33)\n");
         Point* p3 = new Point(11, 33);
+        printf("\t");
+        p3->printPoint();
 
+        printf("\n");
+        printf("Удаление объектов\n");
+
+        //удаляем из памяти динамически выделенные объекты
         delete p1;
         delete p2;
         delete p3;
